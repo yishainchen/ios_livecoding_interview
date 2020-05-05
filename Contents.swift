@@ -58,7 +58,7 @@ struct ChatRoom {
         if let name = customNamePool.popLast() {
             UserManager.shared.userList[userIdentifier] = Profile(name: name, color: ProfileObjectsPool().getRandomColor())
         } else {
-            UserManager.shared.userNameSuffix += 1
+            UserManager.shared.updateUserNameSuffix()
             customNamePool = ProfileObjectsPool().refillNamePool()
             UserManager.shared.userList[userIdentifier] = Profile(name: customNamePool.removeLast(), color: ProfileObjectsPool().getRandomColor())
         }
