@@ -24,16 +24,15 @@ struct ProfileObjectsPool {
     var colorPool: [UIColor] = [.red, .brown, .cyan, .magenta, .yellow]
     
     func getRandomColor() -> UIColor {
-        return colorPool[Int.random(in: 0..<colorPool.count - 1)]
+        return colorPool[Int.random(in: 0..<colorPool.count)]
     }
     
-    func refillNamePool() -> [String] {
-        return namePool.map{ $0 + UserManager.shared.getUserNameSuffix() }
+    func refillNamePool(userManager: UserManager) -> [String] {
+        return namePool.map{ $0 + userManager.getUserNameSuffix() }
     }
 }
 
 class UserManager {
-    static let shared = UserManager()
     var userList: [String: Profile] = [:]
     var userNameSuffix: Int = 0
     
@@ -42,25 +41,26 @@ class UserManager {
     }
     
     func getUserNameSuffix() -> String {
-        return "_\(UserManager.shared.userNameSuffix)"
+        return "_\(userNameSuffix)"
     }
     
     func askAnonymouseProfile(user: String) -> Profile? {
-        return UserManager.shared.userList[user]
+        return userList[user]
     }
 }
 
 struct ChatRoom {
     var customNamePool = ProfileObjectsPool().namePool
+    var userManager = UserManager()
     
     mutating func joinRoom(userIdentifier: UserIdentifier) {
-        guard UserManager.shared.userList[userIdentifier] == nil else { return }
+        guard userManager.userList[userIdentifier] == nil else { return }
         if let name = customNamePool.popLast() {
-            UserManager.shared.userList[userIdentifier] = Profile(name: name, color: ProfileObjectsPool().getRandomColor())
+            userManager.userList[userIdentifier] = Profile(name: name, color: ProfileObjectsPool().getRandomColor())
         } else {
-            UserManager.shared.updateUserNameSuffix()
-            customNamePool = ProfileObjectsPool().refillNamePool()
-            UserManager.shared.userList[userIdentifier] = Profile(name: customNamePool.removeLast(), color: ProfileObjectsPool().getRandomColor())
+            userManager.updateUserNameSuffix()
+            customNamePool = ProfileObjectsPool().refillNamePool(userManager: userManager)
+            userManager.userList[userIdentifier] = Profile(name: customNamePool.removeLast(), color: ProfileObjectsPool().getRandomColor())
         }
     }
 }
@@ -74,4 +74,4 @@ chatRoom.joinRoom(userIdentifier: "user5")
 chatRoom.joinRoom(userIdentifier: "user6")
 chatRoom.joinRoom(userIdentifier: "user7")
 
-print(UserManager.shared.userList)
+print(chatRoom.userManager.userList)
